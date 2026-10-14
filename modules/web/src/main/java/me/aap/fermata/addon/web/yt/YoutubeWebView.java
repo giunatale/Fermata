@@ -150,7 +150,7 @@ public class YoutubeWebView extends FermataWebView {
 				"function attachVideoListeners(v) {\n" +
 				"  if (v.getAttribute('FermataAttached') === 'true') return;\n" +
 				"  v.setAttribute('FermataAttached', 'true');\n" +
-				"  v.setAttribute('style', 'object-fit:" + scale + "');\n" + debug +
+				"  v.style.objectFit = '" + scale + "';\n" + debug +
 				"  if ((v.currentTime > 0) && !v.paused && !v.ended) videoEvent(v, " + JS_VIDEO_PLAYING + ");\n" +
 				"  v.addEventListener('playing', function(e) {videoEvent(v, " + JS_VIDEO_PLAYING + ");});\n" +
 				"  v.addEventListener('pause', function(e) {videoEvent(v, " + JS_VIDEO_PAUSED + ");});\n" +
@@ -424,6 +424,6 @@ public class YoutubeWebView extends FermataWebView {
 		String p = scale.prefName();
 		loadUrl("javascript:" +
 				"document.querySelectorAll('video')" +
-				".forEach(v=> v.setAttribute('style', 'object-fit:" + p + "'));");
+				".forEach(v=> v.style.objectFit = '" + p + "');");
 	}
 }
