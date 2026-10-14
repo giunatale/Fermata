@@ -35,6 +35,11 @@ import me.aap.utils.pref.PreferenceStore;
  * @author Andrey Pavlenko
  */
 public class YoutubeWebView extends FermataWebView {
+	static {
+		// Debug build only: lets chrome://inspect attach to the YouTube page
+		android.webkit.WebView.setWebContentsDebuggingEnabled(true);
+	}
+
 	private static final String CLEAR_HIGHEST_VIDEO_QUALITY_JS =
 			"function clearFermataQ() {\n" +
 					"  if (!window.__fermataQ) return;\n" +
