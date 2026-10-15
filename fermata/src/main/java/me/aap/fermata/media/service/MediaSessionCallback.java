@@ -616,8 +616,10 @@ public class MediaSessionCallback extends MediaSessionCompat.Callback
 	private boolean isFromOtherApp() {
 		try {
 			var info = session.getCurrentControllerInfo();
+			Log.i("Play requested by ", info.getPackageName());
 			return !lib.getContext().getPackageName().equals(info.getPackageName());
 		} catch (RuntimeException ex) {
+			Log.i("Play requested by Fermata's own controls");
 			return false;
 		}
 	}
@@ -631,8 +633,10 @@ public class MediaSessionCallback extends MediaSessionCompat.Callback
 			if (!lib.getPrefs().getBooleanPref(MediaLibPrefs.RESUME_PREVIOUS_APP_ON_LEAVE)) return;
 			int st = getPlaybackState().getState();
 			// Only with nothing to offer, which is what a greyed out play button means
-			if ((metadata != null) || ((st != STATE_NONE) && (st != STATE_STOPPED) && (st != STATE_ERROR)))
+			if ((metadata != null) || ((st != STATE_NONE) && (st != STATE_STOPPED) && (st != STATE_ERROR))) {
+				Log.i("No handoff: Fermata has something to resume");
 				return;
+			}
 			PreviousMediaApp.handBack(lib.getContext(), lib.getPrefs());
 		};
 		App.get().getHandler().postDelayed(carScreenLeft, 2000);
@@ -647,6 +651,7 @@ public class MediaSessionCallback extends MediaSessionCompat.Callback
 	// Report it right away, rather than leaving the caller (e.g. Android Auto's autoplay) waiting
 	private void nothingToResume(boolean handOff) {
 		if (handOff) PreviousMediaApp.resume(lib.getContext(), lib.getPrefs());
+		else Log.i("Nothing to resume, no handoff for Fermata's own request");
 		setMetadata(null);
 		setPlaybackState(new PlaybackStateCompat.Builder().setActions(SUPPORTED_ACTIONS)
 				.setState(STATE_ERROR, 0, 1.0f)
