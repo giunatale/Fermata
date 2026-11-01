@@ -41,6 +41,7 @@ final class PreviousMediaApp {
 			String pkg = c.getPackageName();
 			if (pkg.equals(ctx.getPackageName())) continue;
 			prefs.applyStringPref(MediaLibPrefs.PREVIOUS_MEDIA_APP, pkg);
+			Log.i("Previous media app: ", pkg);
 			tookOver = true;
 			return;
 		}
@@ -48,12 +49,18 @@ final class PreviousMediaApp {
 
 	// Called when Fermata's car screen is closed with nothing to resume
 	static void handBack(Context ctx, MediaLibPrefs prefs) {
-		if (!tookOver) return;
+		if (!tookOver) {
+			Log.i("No handoff: Fermata hasn't taken over from another media app");
+			return;
+		}
 
 		// Same query as the Car App Library's CarConnection: is Android Auto projecting right now?
 		try (Cursor c = ctx.getContentResolver().query(Uri.parse("content://androidx.car.app.connection"),
 				new String[]{"CarConnectionState"}, null, null, null)) {
-			if ((c == null) || !c.moveToNext() || (c.getInt(0) != 2)) return; // 2: CONNECTION_TYPE_PROJECTION
+			if ((c == null) || !c.moveToNext() || (c.getInt(0) != 2)) { // 2: CONNECTION_TYPE_PROJECTION
+				Log.i("No handoff: Android Auto isn't projecting");
+				return;
+			}
 		} catch (Exception ex) {
 			Log.d(ex, "Failed to query the car connection");
 			return;
@@ -67,6 +74,7 @@ final class PreviousMediaApp {
 			if (!c.getPackageName().equals(pkg)) continue;
 			PlaybackState st = c.getPlaybackState();
 			if ((st != null) && (st.getState() == PlaybackState.STATE_PLAYING)) {
+				Log.i("No handoff: ", pkg, " is already playing");
 				tookOver = false;
 				return;
 			}
@@ -85,6 +93,7 @@ final class PreviousMediaApp {
 
 		for (MediaController c : sessions) {
 			if (!pkg.equals(c.getPackageName())) continue;
+			Log.i("Resuming the previous media app: ", pkg);
 			c.getTransportControls().play();
 			return;
 		}
@@ -92,6 +101,7 @@ final class PreviousMediaApp {
 		// No session left: try its media button receiver
 		Intent i = new Intent(Intent.ACTION_MEDIA_BUTTON).setPackage(pkg);
 		if (ctx.getPackageManager().queryBroadcastReceivers(i, 0).isEmpty()) return;
+		Log.i("Sending play to the previous media app: ", pkg);
 		ctx.sendBroadcast(new Intent(i).putExtra(Intent.EXTRA_KEY_EVENT,
 				new KeyEvent(ACTION_DOWN, KEYCODE_MEDIA_PLAY)));
 		ctx.sendBroadcast(new Intent(i).putExtra(Intent.EXTRA_KEY_EVENT,
