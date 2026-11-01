@@ -524,6 +524,8 @@ public class MediaSessionCallback extends MediaSessionCompat.Callback
 		// Only a request from another app (e.g. Android Auto's autoplay or a media button) may be handed
 		// off. Fermata's own controls call this directly, outside of a session request.
 		boolean handOff = otherAppKeyAction || isRequestFromOtherApp();
+		Log.i("Play requested by ", handOff ? "another app" : "Fermata's own controls",
+				otherAppKeyAction ? " (media button)" : "");
 		playerTask.cancel();
 		playerTask = play(handOff);
 	}
@@ -564,6 +566,7 @@ public class MediaSessionCallback extends MediaSessionCompat.Callback
 					} else {
 						// Report it right away, rather than leaving the caller (e.g. Android Auto's autoplay) waiting
 						if (handOff) PreviousMediaApp.resume(lib.getContext(), lib.getPrefs());
+						else Log.i("Nothing to resume, no handoff for Fermata's own request");
 						setMetadata(null);
 						setPlaybackState(new PlaybackStateCompat.Builder().setActions(SUPPORTED_ACTIONS)
 								.setState(STATE_ERROR, 0, 1.0f)
@@ -715,10 +718,16 @@ public class MediaSessionCallback extends MediaSessionCompat.Callback
 			// Only with nothing to offer, which is what a greyed out play button means. The session's
 			// metadata, as playback publishes it directly: a stopped song stays on the card.
 			if ((session.getController().getMetadata() != null) ||
-					((st != STATE_NONE) && (st != STATE_STOPPED) && (st != STATE_ERROR))) return;
+					((st != STATE_NONE) && (st != STATE_STOPPED) && (st != STATE_ERROR))) {
+				Log.i("No handoff: Fermata has something to resume");
+				return;
+			}
 			// Only while Android Auto is projecting: the screen is also left when it disconnects. The state
 			// is kept up to date off the main thread, from Android Auto's connection broadcasts.
-			if (carConnection != 2) return;
+			if (carConnection != 2) {
+				Log.i("No handoff: Android Auto isn't projecting (", carConnection, ")");
+				return;
+			}
 			PreviousMediaApp.handBack(lib.getContext(), lib.getPrefs());
 		};
 		App.get().getHandler().postDelayed(carScreenLeft, 2000);
