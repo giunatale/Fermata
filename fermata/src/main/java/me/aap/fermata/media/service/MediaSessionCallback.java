@@ -260,10 +260,12 @@ public class MediaSessionCallback extends MediaSessionCompat.Callback
 			// Switching the car off doesn't always end the car screen or send a pause, and the playback
 			// would carry on from the phone. Android Auto broadcasts the connection changes to car apps.
 			carConnected = isCarConnected(ctx);
+			Log.i("Car connection at start: ", carConnectionState(ctx));
 			onCarConnection = new BroadcastReceiver() {
 				@Override
 				public void onReceive(Context context, Intent intent) {
 					boolean connected = isCarConnected(context);
+					Log.i("Car connection updated: ", carConnectionState(context), ", playing: ", isPlaying());
 					if (carConnected && !connected) onPause();
 					carConnected = connected;
 				}
@@ -606,6 +608,7 @@ public class MediaSessionCallback extends MediaSessionCompat.Callback
 
 	@Override
 	public void onPause() {
+		Log.i("Pause requested by ", requester(), ", playing: ", isPlaying());
 		PlayableItem i;
 		MediaEngine eng = getEngine();
 		if ((eng == null) || ((i = eng.getSource()) == null)) return;
@@ -627,7 +630,31 @@ public class MediaSessionCallback extends MediaSessionCompat.Callback
 
 	@Override
 	public void onStop() {
+		Log.i("Stop requested by ", requester(), ", playing: ", isPlaying());
 		onStop(true);
+	}
+
+	private String requester() {
+		try {
+			return session.getCurrentControllerInfo().getPackageName();
+		} catch (RuntimeException ex) {
+			return "Fermata";
+		}
+	}
+
+	private static String carConnectionState(Context ctx) {
+		try (Cursor c = ctx.getContentResolver().query(Uri.parse("content://androidx.car.app.connection"),
+				new String[]{"CarConnectionState"}, null, null, null)) {
+			if ((c == null) || !c.moveToNext()) return "unknown";
+			switch (c.getInt(0)) {
+				case 0: return "not connected";
+				case 1: return "native";
+				case 2: return "projecting";
+				default: return String.valueOf(c.getInt(0));
+			}
+		} catch (Exception ex) {
+			return "query failed: " + ex;
+		}
 	}
 
 	private FutureSupplier<?> onStop(boolean setPosition) {

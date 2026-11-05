@@ -117,6 +117,7 @@ public class YoutubeWebView extends FermataWebView {
 			Video v = getVideo(a.getMediaSessionCallback());
 			// Its playback stops here: reopen it paused rather than start playing out of the blue
 			if (v != null) closedVideo = new Video(v.url(), v.position(), false);
+			Log.i("YouTube page destroyed with its screen, video to reopen: ", v);
 			js.pageRemoved();
 		}
 		super.onActivityEvent(a, e);

@@ -85,6 +85,7 @@ public class MainCarActivity extends CarActivity implements FermataActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		Log.i("Car screen created, media service already connected: ", (service != null) && service.isConnected());
 		MainActivityDelegate.setTheme(this, true);
 		super.onCreate(savedInstanceState);
 		initCarActivity(this);
@@ -124,6 +125,7 @@ public class MainCarActivity extends CarActivity implements FermataActivity {
 
 	@Override
 	public void onStop() {
+		Log.i("Car screen stopped");
 		super.onStop();
 		getActivityDelegate().onSuccess(d -> d.getMediaSessionCallback().onCarScreenLeft());
 	}
@@ -131,6 +133,7 @@ public class MainCarActivity extends CarActivity implements FermataActivity {
 	@Override
 	@SuppressWarnings("unchecked")
 	public void onDestroy() {
+		Log.i("Car screen destroyed");
 		super.onDestroy();
 		getActivityDelegate().onSuccess(MainActivityDelegate::onActivityDestroy)
 				.thenRun(() -> ActivityDelegate.setContextToDelegate(null));

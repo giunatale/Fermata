@@ -19,7 +19,7 @@ public class CarService extends CarActivityService {
 
 	@Override
 	public void onCreate() {
-		Log.d("Creating CarService: " + this);
+		Log.i("Car service created");
 		super.onCreate();
 	}
 
@@ -27,6 +27,8 @@ public class CarService extends CarActivityService {
 	public void onDestroy() {
 		Log.d("Destroying CarService: " + this);
 		FermataMediaServiceConnection s = MainCarActivity.service;
+		Log.i("Car service destroyed, media service connected: ", s != null,
+				", playing: ", (s != null) && (s.getMediaSessionCallback() != null) && s.getMediaSessionCallback().isPlaying());
 		if (s == null) return;
 		MainCarActivity.service = null;
 		MediaSessionCallback cb = s.getMediaSessionCallback();
