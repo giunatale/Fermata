@@ -1,5 +1,6 @@
 package me.aap.fermata.addon.web.yt;
 
+import me.aap.utils.log.Log;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -133,6 +134,7 @@ public class YoutubeFragment extends WebBrowserFragment implements FermataServic
 			MainActivityDelegate.getActivityDelegate(getContext()).onSuccess(a -> {
 				FermataServiceUiBinder b = a.getMediaServiceBinder();
 				if (YoutubeMediaEngine.isYoutubeItem(b.getCurrentItem()) && b.isPlaying()) {
+					Log.i("Pause when leaving the screen: pausing");
 					b.getMediaSessionCallback().onPause();
 					playOnResume = true;
 				} else {
@@ -151,6 +153,7 @@ public class YoutubeFragment extends WebBrowserFragment implements FermataServic
 		MainActivityDelegate.getActivityDelegate(getContext()).onSuccess(a -> {
 			FermataServiceUiBinder b = a.getMediaServiceBinder();
 			if (YoutubeMediaEngine.isYoutubeItem(b.getCurrentItem())) {
+				Log.i("Pause when leaving the screen: resuming");
 				b.getMediaSessionCallback().onPlay();
 			}
 		});

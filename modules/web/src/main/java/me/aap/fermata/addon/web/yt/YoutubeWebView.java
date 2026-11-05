@@ -119,7 +119,10 @@ public class YoutubeWebView extends FermataWebView {
 	public void onActivityEvent(MainActivityDelegate a, long e) {
 		// The page is gone with its activity (e.g. Fermata Auto exited from Android Auto), and nothing
 		// can continue its playback. Switching to another section only detaches it until it's shown again.
-		if ((e == ACTIVITY_DESTROY) && (js != null)) js.pageRemoved();
+		if ((e == ACTIVITY_DESTROY) && (js != null)) {
+			Log.i("YouTube page destroyed with its screen, stopping its playback");
+			js.pageRemoved();
+		}
 		super.onActivityEvent(a, e);
 	}
 

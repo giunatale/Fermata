@@ -271,6 +271,7 @@ public class MediaSessionCallback extends MediaSessionCompat.Callback
 				@Override
 				protected void onQueryComplete(int token, Object cookie, Cursor c) {
 					int connection = getCarConnection(c);
+					Log.i("Car connection: ", connection, ", was ", carConnection, ", playing: ", isPlaying());
 					if ((carConnection != 0) && (connection == 0)) onPause();
 					carConnection = connection;
 				}
@@ -649,6 +650,7 @@ public class MediaSessionCallback extends MediaSessionCompat.Callback
 
 	@Override
 	public void onPause() {
+		Log.i("Pause requested by ", requester(), ", playing: ", isPlaying());
 		PlayableItem i;
 		MediaEngine eng = getEngine();
 		if ((eng == null) || ((i = eng.getSource()) == null)) return;
@@ -670,7 +672,16 @@ public class MediaSessionCallback extends MediaSessionCompat.Callback
 
 	@Override
 	public void onStop() {
+		Log.i("Stop requested by ", requester(), ", playing: ", isPlaying());
 		onStop(true);
+	}
+
+	private String requester() {
+		try {
+			return session.getCurrentControllerInfo().getPackageName();
+		} catch (RuntimeException ex) {
+			return "Fermata";
+		}
 	}
 
 	private FutureSupplier<?> onStop(boolean setPosition) {
